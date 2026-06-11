@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Green Bamboo Cafe — Orders</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Inter:wght@400;500;600&display=swap');
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --g1:#1A3A2A;--g2:#2D5A3D;--g3:#3D7A52;--g4:#52A06B;--g5:#7DC48A;
+  --g-light:#EBF5EE;--g-mid:#C8E6CE;--g-border:#A8D5B0;
+  --bamboo:#8B6914;--bamboo-light:#F5EDD6;--bamboo-border:#D4B86A;
+  --bg:#F2F7F3;--surface:#fff;--surface2:#EBF5EE;
+  --border:#D0E8D6;--border2:#A8D5B0;
+  --text:#0F2318;--text2:#3D6B4A;--text3:#7AAA85;
+  --r:12px;--rs:8px;
+  --serif:'Playfair Display',Georgia,serif;
+  --sans:'Inter',system-ui,sans-serif;
+}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+.bamboo-stripe{width:100%;height:4px;background:repeating-linear-gradient(90deg,var(--g3) 0,var(--g3) 18px,var(--g5) 18px,var(--g5) 20px,var(--g1) 20px,var(--g1) 38px,var(--g4) 38px,var(--g4) 40px);}
+
+/* TOPBAR */
+.topbar{background:var(--g1);color:#fff;padding:0 1.25rem;display:flex;align-items:center;justify-content:space-between;height:62px;position:sticky;top:0;z-index:300;box-shadow:0 3px 12px rgba(15,35,24,0.35);}
+.logo{display:flex;align-items:center;gap:11px;}
+.logo-icon{width:38px;height:38px;flex-shrink:0;}
+.logo-text{display:flex;flex-direction:column;}
+.logo-name{font-family:var(--serif);font-size:18px;font-weight:700;letter-spacing:0.02em;line-height:1.1;}
+.logo-sub{font-size:10px;color:var(--g5);letter-spacing:0.08em;text-transform:uppercase;margin-top:1px;}
+.topbar-right{display:flex;align-items:center;gap:8px;}
+.nav-tabs{display:flex;gap:4px;}
+.nav-tab{background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:20px;padding:6px 15px;font-size:13px;cursor:pointer;color:rgba(255,255,255,0.8);transition:all 0.15s;font-family:var(--sans);}
+.nav-tab.active,.nav-tab:hover{background:rgba(255,255,255,0.22);color:#fff;}
+.waiter-pill{background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.25);border-radius:20px;padding:6px 13px;font-size:13px;display:flex;align-items:center;gap:7px;cursor:pointer;color:#fff;}
+.waiter-pill:hover{background:rgba(255,255,255,0.22);}
+.live-dot{width:8px;height:8px;border-radius:50%;background:#6EE27A;animation:lp 2s infinite;}
+@keyframes lp{0%,100%{opacity:1}50%{opacity:0.4}}
+
+/* PAGES */
+#page-dashboard{display:block;}
+#page-log{display:none;}
+.dash-inner{padding:1.25rem;}
+.syncbar{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text3);margin-bottom:1.25rem;}
+.syncbar a{color:var(--g3);margin-left:auto;cursor:pointer;font-weight:500;}
+.zone-label{font-size:11px;font-weight:600;letter-spacing:0.09em;text-transform:uppercase;color:var(--text3);margin:0 0 9px;display:flex;align-items:center;gap:6px;}
+.zone-label::after{content:"";flex:1;height:1px;background:var(--border);}
+.zone-sec{margin-bottom:1.75rem;}
+.tables-row{display:flex;flex-wrap:wrap;gap:12px;}
+
+/* TABLE CARDS */
+.tcard{width:148px;min-height:115px;background:var(--surface);border:2px solid var(--border);border-radius:var(--r);padding:14px;cursor:pointer;transition:all 0.18s;position:relative;user-select:none;overflow:hidden;}
+.tcard::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:var(--border);transition:background 0.18s;}
+.tcard:hover{border-color:var(--g3);box-shadow:0 4px 16px rgba(61,122,82,0.18);transform:translateY(-3px);}
+.tcard:hover::before{background:var(--g3);}
+.tcard:active{transform:scale(0.97);}
+.tcard.ordered{border-color:var(--bamboo);background:var(--bamboo-light);}
+.tcard.ordered::before{background:var(--bamboo);}
+.tcard.partial{border-color:var(--g3);background:var(--g-light);}
+.tcard.partial::before{background:var(--g3);}
+.tcard.delivered{border-color:var(--g4);background:var(--g-light);opacity:0.8;}
+.tcard.delivered::before{background:var(--g4);}
+.tcard-num{font-family:var(--serif);font-size:23px;font-weight:700;color:var(--text);}
+.tcard-zone{font-size:10px;color:var(--text3);margin-top:1px;text-transform:uppercase;letter-spacing:0.07em;}
+.tcard-status{font-size:11px;color:var(--text2);margin-top:6px;line-height:1.4;}
+.tcard-chips{margin-top:6px;display:flex;flex-wrap:wrap;gap:3px;}
+.chip{font-size:10px;padding:2px 7px;border-radius:12px;background:var(--bamboo-light);color:#6B4A0A;border:0.5px solid var(--bamboo-border);white-space:nowrap;}
+.chip.done{background:var(--g-light);color:#1A5C2A;border-color:var(--g-border);text-decoration:line-through;opacity:0.6;}
+.chip.blink{animation:blinkfade 1.8s ease-out forwards;}
+@keyframes blinkfade{0%{opacity:1}20%{opacity:0}40%{opacity:1}65%{opacity:0}85%{opacity:.6}100%{opacity:.2;text-decoration:line-through;}}
+.tcard-by{position:absolute;bottom:7px;right:9px;font-size:10px;color:var(--text3);}
+
+/* FULLSCREEN ORDER SCREEN */
+#order-screen{display:none;position:fixed;inset:0;z-index:400;background:var(--bg);flex-direction:column;}
+#order-screen.open{display:flex;}
+.os-header{background:var(--g1);color:#fff;height:62px;display:flex;align-items:center;padding:0 1.1rem;gap:12px;flex-shrink:0;box-shadow:0 3px 12px rgba(15,35,24,0.3);}
+.os-back{background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.28);border-radius:var(--rs);padding:7px 13px;color:#fff;cursor:pointer;font-size:13px;font-family:var(--sans);display:flex;align-items:center;gap:6px;transition:background 0.15s;}
+.os-back:hover{background:rgba(255,255,255,0.28);}
+.os-title{font-family:var(--serif);font-size:18px;font-weight:700;flex:1;}
+.os-badge{font-size:12px;padding:4px 12px;border-radius:12px;background:rgba(255,255,255,0.18);border:1px solid rgba(255,255,255,0.28);}
+.os-body{display:grid;grid-template-columns:1fr 370px;flex:1;overflow:hidden;}
+@media(max-width:760px){.os-body{grid-template-columns:1fr;}}
+
+/* Menu side */
+.os-menu{overflow-y:auto;padding:1rem 1.25rem;background:var(--bg);}
+.cat-section{margin-bottom:1.25rem;}
+.cat-head{font-size:11px;font-weight:700;letter-spacing:0.09em;text-transform:uppercase;color:var(--text3);padding:8px 0 7px;border-bottom:2px solid var(--g-mid);margin-bottom:9px;position:sticky;top:0;background:var(--bg);}
+.menu-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:7px;}
+.mbtn{padding:10px 13px;border-radius:var(--rs);border:1.5px solid var(--border);background:var(--surface);cursor:pointer;font-size:13px;color:var(--text);text-align:left;transition:all 0.13s;font-family:var(--sans);display:flex;align-items:center;justify-content:space-between;gap:6px;line-height:1.3;}
+.mbtn:hover{border-color:var(--g3);background:var(--g-light);color:var(--g2);}
+.mbtn:active{transform:scale(0.95);}
+.mbtn.in-order{border-color:var(--g3);background:var(--g-light);color:var(--g2);}
+.mbtn .mplus{font-size:14px;font-weight:600;color:var(--border2);flex-shrink:0;min-width:24px;text-align:right;}
+.mbtn:hover .mplus,.mbtn.in-order .mplus{color:var(--g3);}
+
+/* Order side */
+.os-order{background:var(--surface);border-left:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;}
+.os-order-head{padding:1rem 1.25rem;border-bottom:1px solid var(--border);font-size:14px;font-weight:600;flex-shrink:0;display:flex;align-items:center;gap:8px;}
+.os-order-list{flex:1;overflow-y:auto;padding:0.25rem 1.25rem 0.5rem;}
+.os-order-empty{padding:2rem 1rem;text-align:center;color:var(--text3);font-size:13px;}
+
+/* Order item row */
+.oi{display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:0.5px solid var(--border);}
+.oi:last-child{border-bottom:none;}
+.oi-left{flex:1;min-width:0;}
+.oi-name{font-size:13px;color:var(--text);line-height:1.3;}
+.oi-name.done{text-decoration:line-through;color:var(--text3);}
+.oi-delivered-tag{display:inline-block;font-size:10px;color:var(--g3);font-weight:600;margin-top:2px;}
+.oi-right{display:flex;align-items:center;gap:6px;flex-shrink:0;}
+.qty-ctrl{display:flex;align-items:center;}
+.qb{width:28px;height:28px;border:1.5px solid var(--border);background:var(--surface2);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;color:var(--text2);transition:all 0.1s;font-family:var(--sans);}
+.qb:first-child{border-radius:var(--rs) 0 0 var(--rs);}
+.qb:last-child{border-radius:0 var(--rs) var(--rs) 0;}
+.qb:hover{background:var(--g2);color:#fff;border-color:var(--g2);}
+.qty-n{width:30px;text-align:center;font-size:13px;font-weight:600;border-top:1.5px solid var(--border);border-bottom:1.5px solid var(--border);padding:4px 0;background:var(--surface);}
+
+/* Per-item deliver button */
+.deliver-item-btn{padding:4px 9px;border-radius:var(--rs);border:1.5px solid var(--g-border);background:var(--g-light);color:var(--g2);font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:var(--sans);transition:all 0.12s;}
+.deliver-item-btn:hover{background:var(--g3);color:#fff;border-color:var(--g3);}
+.deliver-item-btn:disabled{opacity:0.4;cursor:not-allowed;}
+.item-done-badge{font-size:11px;color:var(--g3);font-weight:600;padding:4px 9px;white-space:nowrap;}
+
+.os-actions{padding:1rem 1.25rem;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:8px;flex-shrink:0;background:var(--surface);}
+.abtn{width:100%;padding:12px;border-radius:var(--r);font-size:14px;font-weight:600;cursor:pointer;border:none;font-family:var(--sans);transition:all 0.15s;display:flex;align-items:center;justify-content:center;gap:8px;}
+.abtn:active{transform:scale(0.97);}
+.abtn:disabled{opacity:0.35;cursor:not-allowed;transform:none;}
+.abtn-place{background:var(--g2);color:#fff;}
+.abtn-place:hover:not(:disabled){background:var(--g1);}
+.abtn-deliver-all{background:var(--g3);color:#fff;}
+.abtn-deliver-all:hover{background:var(--g2);}
+.abtn-row{display:flex;gap:8px;}
+.abtn-bill{background:var(--bamboo);color:#fff;flex:1;}
+.abtn-bill:hover{background:#6B4A0A;}
+.abtn-clear{flex:1;background:var(--surface2);color:var(--text2);border:1.5px solid var(--border);}
+.abtn-clear:hover{background:var(--g-light);border-color:var(--g-border);color:var(--g2);}
+
+/* Divider label in order panel */
+.order-section-label{font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text3);padding:10px 0 4px;border-bottom:1px dashed var(--border);margin-bottom:4px;}
+
+/* LOG PAGE */
+.log-inner{padding:1.25rem;}
+.log-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;flex-wrap:wrap;gap:10px;}
+.log-header h2{font-family:var(--serif);font-size:20px;font-weight:700;color:var(--g1);}
+.log-date-sub{font-size:12px;color:var(--text3);margin-top:2px;}
+.log-clear-btn{padding:8px 15px;border-radius:var(--rs);border:1.5px solid var(--border);background:var(--surface);color:var(--text2);font-size:13px;cursor:pointer;font-family:var(--sans);}
+.log-clear-btn:hover{background:#FEF4F4;border-color:#E05050;color:#A32D2D;}
+.log-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:1.5rem;}
+.stat-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r);padding:15px;position:relative;overflow:hidden;}
+.stat-card::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:var(--g4);}
+.stat-card .sc-label{font-size:11px;text-transform:uppercase;letter-spacing:0.07em;color:var(--text3);margin-bottom:5px;font-weight:600;}
+.stat-card .sc-val{font-family:var(--serif);font-size:28px;font-weight:700;color:var(--g1);}
+.stat-card .sc-sub{font-size:11px;color:var(--text3);margin-top:2px;}
+.log-table-wrap{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r);overflow:hidden;}
+.log-table{width:100%;border-collapse:collapse;}
+.log-table th{background:var(--g1);color:rgba(255,255,255,0.9);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;padding:11px 14px;text-align:left;}
+.log-table td{padding:10px 14px;font-size:13px;border-bottom:0.5px solid var(--border);vertical-align:top;color:var(--text);}
+.log-table tr:last-child td{border-bottom:none;}
+.log-table tr:hover td{background:var(--g-light);}
+.log-items{font-size:11px;color:var(--text3);margin-top:3px;line-height:1.5;}
+.sp{display:inline-block;font-size:11px;padding:3px 9px;border-radius:12px;font-weight:500;}
+.sp-placed{background:var(--bamboo-light);color:#6B4A0A;border:0.5px solid var(--bamboo-border);}
+.sp-item-delivered{background:#E8F0FE;color:#1A4A90;border:0.5px solid #A8C4F0;}
+.sp-delivered{background:var(--g-light);color:#1A5C2A;border:0.5px solid var(--g-border);}
+.log-empty{text-align:center;padding:3rem;color:var(--text3);font-size:14px;}
+
+/* BILL MODAL */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(10,25,15,0.6);z-index:600;align-items:center;justify-content:center;}
+.modal-bg.open{display:flex;}
+.modal{background:var(--surface);border-radius:var(--r);width:360px;max-height:92vh;overflow-y:auto;box-shadow:0 16px 48px rgba(15,35,24,0.28);}
+.modal-head{padding:1.25rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--g1);border-radius:var(--r) var(--r) 0 0;}
+.modal-head h4{font-family:var(--serif);font-size:16px;color:#fff;font-weight:700;}
+.modal-close{background:rgba(255,255,255,0.15);border:none;font-size:20px;cursor:pointer;color:#fff;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;}
+.modal-close:hover{background:rgba(255,255,255,0.25);}
+.bill-body{padding:1.5rem;font-family:'Courier New',monospace;font-size:13px;}
+.bill-top{text-align:center;margin-bottom:14px;}
+.bill-top .bill-logo{font-size:28px;margin-bottom:4px;}
+.bill-top h3{font-family:var(--serif);font-size:20px;font-weight:700;color:var(--g1);}
+.bill-top .bill-addr{font-size:11px;color:var(--text3);margin-top:3px;line-height:1.6;}
+.bill-divider{border:none;border-top:1px dashed var(--border2);margin:12px 0;}
+.bill-row{display:flex;justify-content:space-between;padding:3px 0;font-size:13px;}
+.bill-row.hd{font-weight:700;border-bottom:1px solid var(--border2);padding-bottom:7px;margin-bottom:4px;}
+.bill-row.total{font-weight:700;font-size:15px;border-top:1px solid var(--border2);padding-top:8px;margin-top:4px;}
+.bill-thanks{text-align:center;margin-top:14px;font-size:11px;color:var(--text3);line-height:1.7;}
+.modal-foot{padding:1rem 1.25rem;border-top:1px solid var(--border);display:flex;gap:8px;}
+.modal-foot button{flex:1;padding:11px;border-radius:var(--rs);font-size:13px;font-weight:600;cursor:pointer;border:none;font-family:var(--sans);}
+.mbtn-print{background:var(--g2);color:#fff;}
+.mbtn-print:hover{background:var(--g1);}
+.mbtn-close2{background:var(--surface2);color:var(--text2);}
+
+/* NAME MODAL */
+.name-modal-inner{background:var(--surface);border-radius:var(--r);width:320px;overflow:hidden;box-shadow:0 12px 40px rgba(15,35,24,0.22);}
+.nm-head{background:var(--g1);padding:1.25rem;}
+.nm-head h4{font-family:var(--serif);font-size:17px;color:#fff;font-weight:700;}
+.nm-head p{font-size:12px;color:var(--g5);margin-top:4px;}
+.nm-body{padding:1.25rem;}
+.nm-body input{width:100%;padding:11px 13px;border:1.5px solid var(--border);border-radius:var(--rs);font-size:14px;font-family:var(--sans);outline:none;background:var(--bg);}
+.nm-body input:focus{border-color:var(--g3);}
+.nm-body button{width:100%;margin-top:10px;padding:12px;border-radius:var(--rs);background:var(--g2);color:#fff;border:none;font-size:14px;font-weight:600;cursor:pointer;font-family:var(--sans);}
+.nm-body button:hover{background:var(--g1);}
+
+/* LOADING OVERLAY */
+#loading-overlay{position:fixed;inset:0;background:var(--g1);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1000;gap:16px;}
+#loading-overlay .spin{width:40px;height:40px;border:3px solid rgba(255,255,255,0.2);border-top-color:#6EE27A;border-radius:50%;animation:spin 0.8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+#loading-overlay p{color:rgba(255,255,255,0.7);font-size:14px;}
+#loading-overlay .ll{font-family:var(--serif);font-size:22px;color:#fff;font-weight:700;}
+
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(10px);background:var(--g1);color:#E8F5EC;padding:11px 22px;border-radius:var(--r);font-size:13px;z-index:9999;pointer-events:none;opacity:0;transition:all 0.25s;white-space:nowrap;border:1px solid var(--g3);}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+@media print{body *{visibility:hidden;}.bill-body,.bill-body *{visibility:visible;}.bill-body{position:fixed;top:0;left:0;width:100%;}}
+</style>
+</head>
+<body>
+
+<!-- LOADING OVERLAY -->
+<div id="loading-overlay">
+  <div style="font-size:36px">🎋</div>
+  <div class="ll">Green Bamboo Cafe</div>
+  <div class="spin"></div>
+  <p>Connecting to shared orders...</p>
+</div>
+
+<div class="bamboo-stripe"></div>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="logo">
+    <svg class="logo-icon" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="38" height="38" rx="10" fill="#2D5A3D"/>
+      <rect x="11" y="6" width="4" height="26" rx="2" fill="#52A06B"/>
+      <rect x="23" y="6" width="4" height="26" rx="2" fill="#52A06B"/>
+      <rect x="10" y="14" width="6" height="2.5" rx="1.2" fill="#7DC48A"/>
+      <rect x="22" y="18" width="6" height="2.5" rx="1.2" fill="#7DC48A"/>
+      <rect x="10" y="22" width="6" height="2.5" rx="1.2" fill="#7DC48A"/>
+      <path d="M27 10 Q34 8 33 16 Q28 13 27 10Z" fill="#7DC48A"/>
+      <path d="M27 10 Q30 13 33 16" stroke="#52A06B" stroke-width="0.8"/>
+    </svg>
+    <div class="logo-text">
+      <div class="logo-name">Green Bamboo Cafe</div>
+      <div class="logo-sub">Malangwa-09, Sarlahi</div>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <div class="nav-tabs">
+      <div class="nav-tab active" id="tab-dashboard" onclick="showPage('dashboard')">Tables</div>
+      <div class="nav-tab" id="tab-log" onclick="showPage('log')">Day Log</div>
+    </div>
+    <div class="waiter-pill" onclick="promptWaiter()">
+      <div class="live-dot"></div>
+      <span id="waiter-display">Set name</span>
+    </div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="page-dashboard">
+  <div class="dash-inner">
+    <div class="syncbar">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+      <span id="sync-label">Connecting...</span>
+      <a onclick="forceRefresh()">↻ Refresh now</a>
+    </div>
+    <div class="zone-sec">
+      <div class="zone-label">🪑 Main Dining</div>
+      <div class="tables-row" id="zone-main"></div>
+    </div>
+    <div class="zone-sec">
+      <div class="zone-label">🏛️ Hall</div>
+      <div class="tables-row" id="zone-hall"></div>
+    </div>
+    <div class="zone-sec">
+      <div class="zone-label">🌿 Outside</div>
+      <div class="tables-row" id="zone-outside"></div>
+    </div>
+  </div>
+</div>
+
+<!-- LOG PAGE -->
+<div id="page-log">
+  <div class="log-inner">
+    <div class="log-header">
+      <div><h2>Day Log</h2><div class="log-date-sub" id="log-date"></div></div>
+      <button class="log-clear-btn" onclick="clearLog()">Clear today's log</button>
+    </div>
+    <div class="log-summary" id="log-summary"></div>
+    <div class="log-table-wrap" id="log-table-wrap"></div>
+  </div>
+</div>
+
+<!-- FULLSCREEN ORDER SCREEN -->
+<div id="order-screen">
+  <div class="os-header">
+    <button class="os-back" onclick="closeOrderScreen()">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+      Back
+    </button>
+    <span class="os-title" id="os-title">Table</span>
+    <span class="os-badge" id="os-badge">Empty</span>
+  </div>
+  <div class="os-body">
+    <div class="os-menu" id="os-menu"></div>
+    <div class="os-order">
+      <div class="os-order-head">
+        <span>🍃</span> Order
+        <span id="os-count" style="color:var(--text3);font-weight:400;font-size:13px;margin-left:4px;"></span>
+      </div>
+      <div class="os-order-list" id="os-order-list">
+        <div class="os-order-empty">Add items from the menu →</div>
+      </div>
+      <div class="os-actions">
+        <button class="abtn abtn-place" id="btn-place" onclick="placeOrder()" disabled>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          Place Order
+        </button>
+        <div id="extra-actions" style="display:none;flex-direction:column;gap:8px;">
+          <button class="abtn abtn-deliver-all" onclick="markAllDelivered()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            Mark All Delivered
+          </button>
+          <div class="abtn-row">
+            <button class="abtn abtn-bill" onclick="showBill()">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="9" y1="7" x2="15" y2="7"/><line x1="9" y1="11" x2="15" y2="11"/><line x1="9" y1="15" x2="13" y2="15"/></svg>
+              Print Bill
+            </button>
+            <button class="abtn abtn-clear" onclick="clearTable()">Clear Table</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BILL MODAL -->
+<div class="modal-bg" id="bill-modal">
+  <div class="modal">
+    <div class="modal-head"><h4>🧾 Bill — Green Bamboo Cafe</h4><button class="modal-close" onclick="closeBill()">×</button></div>
+    <div class="bill-body" id="bill-body"></div>
+    <div class="modal-foot">
+      <button class="mbtn-print" onclick="window.print()">🖨️ Print Bill</button>
+      <button class="mbtn-close2" onclick="closeBill()">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- NAME MODAL -->
+<div class="modal-bg" id="name-modal">
+  <div class="name-modal-inner">
+    <div class="nm-head"><h4>Welcome to Green Bamboo 🎋</h4><p>Enter your name so orders show who placed them</p></div>
+    <div class="nm-body">
+      <input type="text" id="name-input" placeholder="e.g. Hari, Sita, Counter..." maxlength="20" autocomplete="off"/>
+      <button onclick="confirmName()">Continue →</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── MENU ──────────────────────────────────────────────────────────────────
+const MENU={
+  "🍛 Vej / Non-Vej Khana":["Vej Khana","Chicken Khana","Mutton Khana","Local Chicken Khana","Egg Curry Khana"],
+  "🥘 Khaja Set":["Vej Khaja Set","Chicken Khaja Set","Mutton Khaja Set","Local Khaja Set"],
+  "🍗 Chicken":["Chicken Rost","Chicken Chilli","Chicken Wings (2 Pcs.)","Chicken Leg Pcs","Chicken Pangra Fry","Chicken Gravy"],
+  "🐄 Mutton":["Mutton Fry","Mutton Gravy"],
+  "🐓 Local Chicken":["Local Chicken Fry","Local Chicken Gravy"],
+  "🔥 Tash":["Mutton Tash","Chicken Tash","Local Chicken Tash"],
+  "🍢 Sekuwa":["Mutton Sekuwa","Local Chicken Sekuwa","Chicken Sekuwa","Fish (Fry) Sekuwa"],
+  "🍜 Chowmin":["Vej Chowmin","Mix Vej Chowmin","Mix Non-Vej Chowmin","Chicken Chowmin","Paneer Chowmin"],
+  "🥟 Momo":["Vej Momo (Steam)","Vej Momo (Fried)","Vej Momo (Jhol)","Chicken Momo (Steam)","Chicken Momo (Fried)","Chicken Momo (Jhol)","Mutton Momo (Steam)","Mutton Momo (Fried)","Mutton Momo (Jhol)"],
+  "🍄 Mushroom / Paneer":["Mushroom Chilli","Paneer Chilli"],
+  "🥗 Salad & Snacks":["Papad","Green Salad","Fruit Salad","Rosted Papad","French Fry","Peanut Sadheko","Chauchau Sadheko","Aloo Fry","Burger"],
+  "🍳 Egg":["Poached Egg","Plain Omlate","Masala Omlete"],
+  "🍲 Soup":["Veg Soup","Chicken Soup","Hot N Sour Soup"],
+  "☕ Tea / Coffee":["Milk Tea","Black Tea","Lemon Tea","Milk Coffee","Black Coffee"],
+  "🍺 Beer":["Tuborg Strong (F)","Tuborg Strong (S)","Tuborg Gold (F)","Gorkha Large","Gorkha Small","Arna Large","Arna Small"],
+  "🥃 Drinks / Liquor":["Blach Chimeny /Qtr","OLD DARWAR /Qtr","8848 /Qtr","Black Ok /Qtr","Highlander /Qtr","Golden OK /Qtr","Red Signature /Qtr"],
+};
+
+const SEATS=[
+  {id:"T1",zone:"main",label:"Table 1"},{id:"T2",zone:"main",label:"Table 2"},
+  {id:"T3",zone:"main",label:"Table 3"},{id:"T4",zone:"main",label:"Table 4"},
+  {id:"T5",zone:"main",label:"Table 5"},{id:"T6",zone:"main",label:"Table 6"},
+  {id:"H7",zone:"hall",label:"Hall 7"},{id:"H8",zone:"hall",label:"Hall 8"},
+  {id:"H9",zone:"hall",label:"Hall 9"},{id:"H10",zone:"hall",label:"Hall 10"},
+  {id:"O1",zone:"outside",label:"Outside"},
+];
+
+// ── FLAT INDEX — avoids ALL special-char issues in onclick ─────────────────
+// Every button uses onclick="fn(42)" — numeric index only, no strings in HTML
+const FLAT = [];
+Object.values(MENU).forEach(arr => arr.forEach(i => FLAT.push(i)));
+
+// ── STATE ─────────────────────────────────────────────────────────────────
+let waiterName  = localStorage.getItem("gbc_waiter") || "";
+let selectedId  = null;
+let draftOrder  = {};   // {itemName: qty} — local draft while editing
+let tableState  = {};   // {seatId: {items, delivered, updatedBy, updatedAt}}
+let txLog       = [];
+let lastSavedAt = 0;    // timestamp of our last cloudSet — prevents autoSync from overwriting
+const STORE_KEY = "gbc_shared_v4";
+const LOG_KEY   = "gbc_log_v4b";
+
+// ── CLOUD STORAGE ──────────────────────────────────────────────────────────
+async function cloudGet(key) {
+  try { const r = await window.storage.get(key, true); return r ? JSON.parse(r.value) : null; }
+  catch(e) { return null; }
+}
+async function cloudSet(key, val) {
+  try { await window.storage.set(key, JSON.stringify(val), true); return true; }
+  catch(e) { return false; }
+}
+
+// ── INIT ───────────────────────────────────────────────────────────────────
+async function init() {
+  SEATS.forEach(s => tableState[s.id] = {items:{}, delivered:{}, updatedBy:null, updatedAt:null});
+  const saved = await cloudGet(STORE_KEY);
+  if (saved) SEATS.forEach(s => { if (saved[s.id]) tableState[s.id] = saved[s.id]; });
+  const savedLog = await cloudGet(LOG_KEY);
+  if (savedLog) txLog = savedLog.entries || savedLog || [];
+
+  document.getElementById("loading-overlay").style.display = "none";
+  if (!waiterName) showNameModal();
+  else document.getElementById("waiter-display").textContent = waiterName;
+
+  buildMenuHTML();
+  renderAllTables();
+  setSyncLabel();
+  document.getElementById("log-date").textContent = new Date().toLocaleDateString("en-NP",{weekday:"long",year:"numeric",month:"long",day:"numeric"});
+  setInterval(autoSync, 4000);
+}
+
+async function autoSync() {
+  const saved = await cloudGet(STORE_KEY);
+  if (saved) SEATS.forEach(s => { if (saved[s.id]) tableState[s.id] = saved[s.id]; });
+  const savedLog = await cloudGet(LOG_KEY);
+  // Only accept cloud log if it was saved AFTER our last local save
+  // This prevents autoSync from pulling back a log we just cleared
+  if (savedLog && savedLog.savedAt && savedLog.savedAt >= lastSavedAt) {
+    txLog = savedLog.entries || [];
+  }
+  renderAllTables();
+  if (selectedId) updateOrderPanel();
+  setSyncLabel();
+}
+
+async function saveAll() {
+  lastSavedAt = Date.now();
+  await cloudSet(STORE_KEY, tableState);
+  await cloudSet(LOG_KEY, {savedAt: lastSavedAt, entries: txLog});
+  setSyncLabel();
+}
+
+function setSyncLabel() {
+  document.getElementById("sync-label").textContent = "All devices synced · " + new Date().toLocaleTimeString();
+}
+async function forceRefresh() { await autoSync(); toast("↻ Refreshed"); }
+
+// ── NAME ───────────────────────────────────────────────────────────────────
+function showNameModal() { document.getElementById("name-modal").classList.add("open"); setTimeout(()=>document.getElementById("name-input").focus(),120); }
+function promptWaiter()  { document.getElementById("name-input").value = waiterName||""; showNameModal(); }
+function confirmName() {
+  const v = document.getElementById("name-input").value.trim();
+  if (!v) return;
+  waiterName = v; localStorage.setItem("gbc_waiter", v);
+  document.getElementById("waiter-display").textContent = v;
+  document.getElementById("name-modal").classList.remove("open");
+}
+document.getElementById("name-input").addEventListener("keydown", e => { if(e.key==="Enter") confirmName(); });
+
+// ── PAGE SWITCH ────────────────────────────────────────────────────────────
+function showPage(p) {
+  document.getElementById("page-dashboard").style.display = p==="dashboard" ? "block" : "none";
+  document.getElementById("page-log").style.display       = p==="log"       ? "block" : "none";
+  document.getElementById("tab-dashboard").classList.toggle("active", p==="dashboard");
+  document.getElementById("tab-log").classList.toggle("active", p==="log");
+  if (p==="log") renderLog();
+}
+
+// ── TABLE GRID ─────────────────────────────────────────────────────────────
+function renderAllTables() {
+  ["main","hall","outside"].forEach(zone => {
+    const el = document.getElementById("zone-"+zone);
+    el.innerHTML = "";
+    SEATS.filter(s => s.zone===zone).forEach(s => {
+      const st = tableState[s.id] || {items:{}, delivered:{}};
+      const items     = st.items     || {};
+      const delivered = st.delivered || {};
+      const keys      = Object.keys(items);
+      const hasItems  = keys.length > 0;
+      const doneCount = keys.filter(k => delivered[k]).length;
+      const allDone   = hasItems && doneCount === keys.length;
+      const someDone  = hasItems && doneCount > 0 && !allDone;
+
+      let cls = "tcard";
+      if      (allDone)  cls += " delivered";
+      else if (someDone) cls += " partial";
+      else if (hasItems) cls += " ordered";
+
+      let statusTxt = "Empty — tap to order";
+      let chipsHTML = "";
+      if (hasItems) {
+        if      (allDone)  statusTxt = "✓ All delivered";
+        else if (someDone) statusTxt = doneCount+"/"+keys.length+" delivered · "+(keys.length-doneCount)+" pending";
+        else               statusTxt = keys.length+" item type(s) — pending";
+        chipsHTML = keys.map(n =>
+          `<span class="chip${delivered[n]?" done":""}">${n} ×${items[n]}</span>`
+        ).join("");
+      }
+
+      el.innerHTML += `<div class="${cls}" onclick="openOrderScreen('${s.id}')">
+        <div class="tcard-num">${s.id}</div>
+        <div class="tcard-zone">${s.label}</div>
+        <div class="tcard-status">${statusTxt}</div>
+        <div class="tcard-chips">${chipsHTML}</div>
+        ${st.updatedBy ? `<div class="tcard-by">${st.updatedBy}</div>` : ""}
+      </div>`;
+    });
+  });
+}
+
+// ── MENU HTML ──────────────────────────────────────────────────────────────
+let menuHTMLCache = "";
+function buildMenuHTML() {
+  let html = "";
+  for (const [cat, items] of Object.entries(MENU)) {
+    html += `<div class="cat-section"><div class="cat-head">${cat}</div><div class="menu-grid">`;
+    items.forEach(item => {
+      const idx = FLAT.indexOf(item);   // pure number — no strings in onclick
+      html += `<button class="mbtn" id="mb${idx}" onclick="addItem(${idx})"><span>${item}</span><span class="mplus">+</span></button>`;
+    });
+    html += `</div></div>`;
+  }
+  menuHTMLCache = html;
+}
+
+// ── ORDER SCREEN ────────────────────────────────────────────────────────────
+function openOrderScreen(id) {
+  selectedId = id;
+  const st   = tableState[id] || {items:{}, delivered:{}};
+  draftOrder = JSON.parse(JSON.stringify(st.items || {}));
+  const seat = SEATS.find(s => s.id===id);
+  document.getElementById("os-title").textContent = id+" — "+seat.label;
+  document.getElementById("os-menu").innerHTML    = menuHTMLCache;
+  updateMenuHighlights();
+  updateOrderPanel();
+  document.getElementById("order-screen").classList.add("open");
+  document.body.style.overflow = "hidden";
+}
+
+function closeOrderScreen() {
+  document.getElementById("order-screen").classList.remove("open");
+  document.body.style.overflow = "";
+  selectedId = null;
+  draftOrder = {};
+  renderAllTables();
+}
+
+function updateMenuHighlights() {
+  FLAT.forEach((item, idx) => {
+    const btn = document.getElementById("mb"+idx);
+    if (!btn) return;
+    const qty = draftOrder[item] || 0;
+    btn.classList.toggle("in-order", qty > 0);
+    btn.querySelector(".mplus").textContent = qty > 0 ? "×"+qty : "+";
+  });
+}
+
+function updateOrderPanel() {
+  const st        = tableState[selectedId] || {items:{}, delivered:{}};
+  const delivered = st.delivered || {};
+  const keys      = Object.keys(draftOrder);
+  const hasItems  = keys.length > 0;
+  const doneCount = hasItems ? keys.filter(k => delivered[k]).length : 0;
+  const allDone   = hasItems && doneCount === keys.length;
+  const isPlaced  = Object.keys(st.items || {}).length > 0;
+
+  // Badge
+  const badge = document.getElementById("os-badge");
+  if      (allDone && hasItems)  badge.textContent = "✓ All Delivered";
+  else if (doneCount > 0)        badge.textContent = doneCount+"/"+keys.length+" Delivered";
+  else if (hasItems)             badge.textContent = "Order Active";
+  else                           badge.textContent = "Empty";
+
+  // Item count
+  const totalQty = Object.values(draftOrder).reduce((a,b)=>a+b,0);
+  document.getElementById("os-count").textContent = totalQty > 0 ? "("+totalQty+" items)" : "";
+
+  // Order list
+  const list = document.getElementById("os-order-list");
+  if (!hasItems) {
+    list.innerHTML = `<div class="os-order-empty">Add items from the menu →</div>`;
+  } else {
+    const pending = keys.filter(k => !delivered[k]);
+    const done    = keys.filter(k =>  delivered[k]);
+    let html = "";
+
+    if (pending.length > 0) {
+      html += `<div class="order-section-label">⏳ Pending delivery</div>`;
+      pending.forEach(name => {
+        const qty = draftOrder[name];
+        const idx = FLAT.indexOf(name);   // number only — safe in onclick
+        html += `<div class="oi">
+          <div class="oi-left"><div class="oi-name">${name}</div></div>
+          <div class="oi-right">
+            ${!isPlaced ? `<div class="qty-ctrl">
+              <button class="qb" onclick="changeQty(${idx},-1)">−</button>
+              <span class="qty-n">${qty}</span>
+              <button class="qb" onclick="changeQty(${idx},1)">+</button>
+            </div>` : `<span class="qty-badge">×${qty}</span>
+            <button class="deliver-item-btn" onclick="deliverItem(${idx})">✓ Deliver</button>`}
+          </div>
+        </div>`;
+      });
+    }
+
+    if (done.length > 0) {
+      html += `<div class="order-section-label" style="margin-top:8px;">✅ Delivered</div>`;
+      done.forEach(name => {
+        html += `<div class="oi" style="opacity:0.5;">
+          <div class="oi-left"><div class="oi-name done">${name}</div></div>
+          <div class="oi-right">
+            <span class="qty-badge" style="border-color:var(--g-border);color:var(--g3);">×${draftOrder[name]}</span>
+            <span class="item-done-badge">✓ Done</span>
+          </div>
+        </div>`;
+      });
+    }
+    list.innerHTML = html;
+  }
+
+  // Buttons
+  const btnPlace = document.getElementById("btn-place");
+  btnPlace.disabled     = !hasItems || isPlaced;
+  btnPlace.textContent  = isPlaced ? "✓ Order Placed" : "Place Order";
+  document.getElementById("extra-actions").style.display = isPlaced ? "flex" : "none";
+}
+
+// ── ADD / CHANGE QTY — all use numeric index ───────────────────────────────
+function addItem(idx) {
+  const name = FLAT[idx];
+  if (!name) return;
+  const st = tableState[selectedId] || {items:{}};
+  if (Object.keys(st.items||{}).length > 0) {
+    toast("Order already placed. Clear table to start a new order.");
+    return;
+  }
+  draftOrder[name] = (draftOrder[name] || 0) + 1;
+  updateMenuHighlights();
+  updateOrderPanel();
+}
+
+function changeQty(idx, delta) {
+  const name = FLAT[idx];
+  if (!name || !draftOrder[name]) return;
+  draftOrder[name] += delta;
+  if (draftOrder[name] <= 0) delete draftOrder[name];
+  updateMenuHighlights();
+  updateOrderPanel();
+}
+
+// ── PLACE ORDER ─────────────────────────────────────────────────────────────
+async function placeOrder() {
+  if (!selectedId) return;
+  if (!waiterName) { showNameModal(); return; }
+  tableState[selectedId] = {
+    items:     {...draftOrder},
+    delivered: {},
+    updatedBy: waiterName,
+    updatedAt: Date.now()
+  };
+  addLogEntry({seatId:selectedId, seatLabel:SEATS.find(s=>s.id===selectedId).label,
+    waiter:waiterName, items:{...draftOrder}, action:"placed", time:Date.now()});
+  await saveAll();
+  renderAllTables();
+  updateOrderPanel();
+  toast("✓ Order placed for "+selectedId+" — visible to all staff");
+  setTimeout(() => closeOrderScreen(), 700);
+}
+
+// ── DELIVER ONE ITEM ────────────────────────────────────────────────────────
+async function deliverItem(idx) {
+  const name = FLAT[idx];
+  if (!name || !selectedId) return;
+  const st = tableState[selectedId];
+  if (!st) return;
+  st.delivered      = st.delivered || {};
+  st.delivered[name] = true;
+  st.updatedBy       = waiterName;
+  st.updatedAt       = Date.now();
+  draftOrder[name]   = st.items[name];   // keep draft in sync
+  addLogEntry({seatId:selectedId, seatLabel:SEATS.find(s=>s.id===selectedId).label,
+    waiter:waiterName, items:{[name]: st.items[name]}, action:"item_delivered", time:Date.now()});
+  await saveAll();
+  renderAllTables();
+  updateOrderPanel();
+  toast('🍃 "'+name+'" delivered at '+selectedId);
+
+  // Auto-clear when every item is done
+  const allKeys  = Object.keys(st.items || {});
+  const doneCount = allKeys.filter(k => st.delivered[k]).length;
+  if (doneCount === allKeys.length) {
+    addLogEntry({seatId:selectedId, seatLabel:SEATS.find(s=>s.id===selectedId).label,
+      waiter:waiterName, items:{...st.items}, action:"delivered", time:Date.now()});
+    await saveAll();
+    toast("✅ All items delivered at "+selectedId+"! Clearing in 5s...");
+    const clearId = selectedId;
+    setTimeout(async () => {
+      tableState[clearId] = {items:{}, delivered:{}, updatedBy:null, updatedAt:null};
+      await saveAll();
+      renderAllTables();
+      if (selectedId === clearId) { draftOrder = {}; closeOrderScreen(); }
+    }, 5000);
+  }
+}
+
+// ── MARK ALL DELIVERED ──────────────────────────────────────────────────────
+async function markAllDelivered() {
+  if (!selectedId) return;
+  const st = tableState[selectedId];
+  if (!st || !Object.keys(st.items||{}).length) return;
+  const di = {};
+  Object.keys(st.items).forEach(k => di[k] = true);
+  tableState[selectedId] = {...st, delivered:di, updatedBy:waiterName, updatedAt:Date.now()};
+  addLogEntry({seatId:selectedId, seatLabel:SEATS.find(s=>s.id===selectedId).label,
+    waiter:waiterName, items:{...st.items}, action:"delivered", time:Date.now()});
+  await saveAll();
+  renderAllTables();
+  updateOrderPanel();
+  toast("✅ All delivered at "+selectedId+"! Clearing in 5s...");
+  const clearId = selectedId;
+  setTimeout(async () => {
+    tableState[clearId] = {items:{}, delivered:{}, updatedBy:null, updatedAt:null};
+    await saveAll();
+    renderAllTables();
+    if (selectedId === clearId) { draftOrder = {}; closeOrderScreen(); }
+  }, 5000);
+}
+
+// ── CLEAR TABLE ─────────────────────────────────────────────────────────────
+async function clearTable() {
+  if (!selectedId) return;
+  if (!confirm("Clear all orders for "+selectedId+"?")) return;
+  tableState[selectedId] = {items:{}, delivered:{}, updatedBy:null, updatedAt:null};
+  draftOrder = {};
+  await saveAll();
+  renderAllTables();
+  toast(selectedId+" cleared");
+  closeOrderScreen();   // always close and go back to dashboard
+}
+
+// ── LOG ──────────────────────────────────────────────────────────────────────
+function addLogEntry(e) {
+  txLog.push({...e, itemCount:Object.values(e.items).reduce((a,b)=>a+b,0),
+    id: Date.now()+"_"+Math.random().toString(36).slice(2)});
+}
+
+function renderLog() {
+  const today   = new Date().toDateString();
+  const entries = txLog.filter(e => new Date(e.time).toDateString()===today);
+  const placed  = entries.filter(e => e.action==="placed");
+  const cleared = entries.filter(e => e.action==="delivered");
+  const total   = placed.reduce((a,e)=>a+e.itemCount,0);
+  const tables  = new Set(placed.map(e=>e.seatId)).size;
+
+  document.getElementById("log-summary").innerHTML =
+    stat("Orders Placed",  placed.length,  "today") +
+    stat("Tables Cleared", cleared.length, "completed") +
+    stat("Items Ordered",  total,          "today") +
+    stat("Tables Active",  tables,         "today");
+
+  const wrap = document.getElementById("log-table-wrap");
+  if (!entries.length) { wrap.innerHTML=`<div class="log-empty">🎋 No transactions yet today.</div>`; return; }
+
+  const alabel = a => a==="placed"?"Order Placed":a==="item_delivered"?"Item Delivered":"All Delivered";
+  const acls   = a => a==="placed"?"sp-placed":a==="item_delivered"?"sp-item-delivered":"sp-delivered";
+
+  wrap.innerHTML = `<table class="log-table"><thead><tr>
+    <th>Time</th><th>Table</th><th>By</th><th>Action</th><th>Items</th>
+  </tr></thead><tbody>`
+  + [...entries].reverse().map(e => {
+      const t = new Date(e.time).toLocaleTimeString("en-NP",{hour:"2-digit",minute:"2-digit"});
+      const items = Object.entries(e.items).map(([n,q])=>n+" ×"+q).join(", ");
+      return `<tr>
+        <td>${t}</td>
+        <td><strong>${e.seatId}</strong><div style="font-size:11px;color:var(--text3)">${e.seatLabel}</div></td>
+        <td>${e.waiter||"—"}</td>
+        <td><span class="sp ${acls(e.action)}">${alabel(e.action)}</span></td>
+        <td><div class="log-items">${items}</div></td>
+      </tr>`;
+    }).join("") + "</tbody></table>";
+}
+
+function stat(label, val, sub) {
+  return `<div class="stat-card"><div class="sc-label">${label}</div><div class="sc-val">${val}</div><div class="sc-sub">${sub}</div></div>`;
+}
+
+async function clearLog() {
+  if (!confirm("Clear today's log? This cannot be undone.")) return;
+  const today = new Date().toDateString();
+  txLog = txLog.filter(e => new Date(e.time).toDateString()!==today);
+  lastSavedAt = Date.now() + 10000; // block autoSync overwrite for 10 extra seconds
+  await saveAll();
+  renderLog();
+  toast("Today's log cleared");
+}
+
+// ── BILL ─────────────────────────────────────────────────────────────────────
+function showBill() {
+  if (!selectedId) return;
+  const st   = tableState[selectedId] || {items:{}};
+  const seat = SEATS.find(s => s.id===selectedId);
+  const items = st.items || {};
+  const now  = new Date();
+  const billNo = "GBC-"+now.getFullYear().toString().slice(-2)+String(now.getMonth()+1).padStart(2,"0")+String(now.getDate()).padStart(2,"0")+"-"+String(Math.floor(Math.random()*900)+100);
+  const delivered = st.delivered || {};
+  const rows = Object.entries(items).map(([n,q]) =>
+    `<div class="bill-row"><span>${n}${delivered[n]?" ✓":""}</span><span>× ${q}</span></div>`
+  ).join("");
+  const total = Object.values(items).reduce((a,b)=>a+b,0);
+  document.getElementById("bill-body").innerHTML = `
+    <div class="bill-top">
+      <div class="bill-logo">🎋</div>
+      <h3>Green Bamboo Cafe</h3>
+      <div class="bill-addr">Malangwa-09, Sarlahi, Nepal<br>Open Daily · Dine in &amp; Takeaway</div>
+    </div>
+    <hr class="bill-divider"/>
+    <div class="bill-row"><span>Bill No</span><span>${billNo}</span></div>
+    <div class="bill-row"><span>Table</span><span>${seat.id} — ${seat.label}</span></div>
+    <div class="bill-row"><span>Served by</span><span>${st.updatedBy||"—"}</span></div>
+    <div class="bill-row"><span>Date</span><span>${now.toLocaleDateString("en-NP")}</span></div>
+    <div class="bill-row"><span>Time</span><span>${now.toLocaleTimeString("en-NP",{hour:"2-digit",minute:"2-digit"})}</span></div>
+    <hr class="bill-divider"/>
+    <div class="bill-row hd"><span>Item</span><span>Qty</span></div>
+    ${rows}
+    <hr class="bill-divider"/>
+    <div class="bill-row total"><span>Total Items</span><span>${total}</span></div>
+    <div class="bill-thanks">🙏 धन्यवाद · Thank you for dining with us!<br>Green Bamboo Cafe, Malangwa-09, Sarlahi<br><em>Please visit again</em></div>`;
+  document.getElementById("bill-modal").classList.add("open");
+}
+function closeBill() { document.getElementById("bill-modal").classList.remove("open"); }
+
+// ── TOAST ─────────────────────────────────────────────────────────────────────
+function toast(msg) {
+  const el = document.getElementById("toast");
+  el.textContent = msg; el.classList.add("show");
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => el.classList.remove("show"), 3000);
+}
+
+init();
+
+</script>
+</body>
+</html>
